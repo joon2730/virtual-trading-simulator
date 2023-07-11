@@ -36,8 +36,7 @@ class LiveChart:
         # plot graph
         self.plot_graph()
 
-        # rotating the x-axis tick labels at 30degree 
-        # towards right
+        # rotating the x-axis tick labels at 30 degree towards right
         plt.xticks(rotation=30, ha='right')
 
         # adjust subplot to fit frame
