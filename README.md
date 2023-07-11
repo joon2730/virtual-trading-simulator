@@ -14,3 +14,4 @@
 - summary
 - line [ticker]*
 - candle [ticker]
+- press enter to move to next time point
