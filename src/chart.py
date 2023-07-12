@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 class LiveChart:
-    def __init__(self, subject, title, style="darkgrid", size=(8, 5), num_axs=1, gridspec=None):
+    def __init__(self, subject, title, style="darkgrid", size=(8, 5), num_axs=1, gridspec=None, sharex=False):
         self.subject = subject
         self.title = title
         self.num_axs = num_axs
@@ -18,7 +18,7 @@ class LiveChart:
         # sns.set(rc={'axes.facecolor':sns.color_palette("Greys_r")[0], 'figure.facecolor':sns.color_palette("Greys_r")[0]})
 
         # here we are creating sub plots
-        self.fig, self.axs = plt.subplots(num_axs, figsize=size, gridspec_kw=gridspec)
+        self.fig, self.axs = plt.subplots(num_axs, figsize=size, gridspec_kw=gridspec, sharex=sharex)
         if num_axs == 1:
             self.axs = [self.axs]
 
@@ -83,8 +83,8 @@ class ComparisonChart(LiveChart):
 class CandleChart(LiveChart):
     def __init__(self, market, ticker):
         self.ticker = ticker
-        title = f"Candle Chart ({ticker}, {market.frequency})"
-        super().__init__(market, title, size=(8, 6), num_axs=2, gridspec={'height_ratios':[4,1]})
+        title = f"Candle Chart with SMA ({ticker}, {market.frequency})"
+        super().__init__(market, title, size=(8, 6), num_axs=2, gridspec={'height_ratios':[4,1]}, sharex = True)
 
     def plot_graph(self):
         # setting title
@@ -117,6 +117,19 @@ class CandleChart(LiveChart):
         self.axs[0].bar(down.index, down['Adj Close']-down.Open, width, bottom=down.Open, color=col2, linewidth=0)
         self.axs[0].bar(down.index, down.High-down.Open, width2, bottom=down.Open, color=col2, linewidth=0)
         self.axs[0].bar(down.index, down.Low-down['Adj Close'], width2, bottom=down['Adj Close'], color=col2, linewidth=0)
+
+        # plott moving averages
+
+        movingavg10d = self.subject.get_ohlcv_series(self.ticker, 'Adj Close').rolling(10).mean()
+        self.axs[0].plot(data.index, movingavg10d, label='10')
+
+        movingavg60d = self.subject.get_ohlcv_series(self.ticker, 'Adj Close').rolling(60).mean()
+        self.axs[0].plot(data.index, movingavg60d, label='60')
+
+        movingavg120d = self.subject.get_ohlcv_series(self.ticker, 'Adj Close').rolling(120).mean()
+        self.axs[0].plot(data.index, movingavg120d, label='120')
+
+        self.axs[0].legend(loc='upper left', fancybox=True, framealpha=0.5)
 
         # plot volume bar
         volume_data = self.subject.get_ohlcv_series(self.ticker, 'Volume')
